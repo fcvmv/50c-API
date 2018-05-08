@@ -99,6 +99,7 @@ namespace Sage50c.ExtenderSample {
 
         private void MyEvents_OnDispose() {
             //Clean up!
+            System.Windows.Forms.MessageBox.Show("Adeus");
         }
 
         private void SystemEvents_OnMenuItem(object Sender, ExtenderEventArgs e) {

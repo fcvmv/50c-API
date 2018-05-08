@@ -66,6 +66,7 @@ namespace Sage50c.ExtenderSample {
 
         private void HeaderEvents_OnDispose() {
             // Dispose your objects
+            System.Windows.Forms.MessageBox.Show("Vou embora.");
         }
 
         private void HeaderEvents_OnLoad(object Sender, ExtenderEventArgs e) {
