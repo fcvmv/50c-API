@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using S50cUtil18;
 
 namespace Sage50c.ExtenderSample {
     class CustomerHandler : IDisposable {
@@ -64,8 +65,11 @@ namespace Sage50c.ExtenderSample {
                     System.Windows.Forms.MessageBox.Show("Pressionei  Customer 1");
                     break;
 
-                case "mniXCustomer2":
-                    System.Windows.Forms.MessageBox.Show("Pressionei  Customer 2");
+                case "mniXFindCustomer":
+                    double customerId = 0;
+                    if( FindCustomer( out customerId )) {
+                        System.Windows.Forms.MessageBox.Show(string.Format("Cliente escolhido: {0}", customerId), MyApp.SystemSettings.Application.LongName, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Information);
+                    }
                     break;
             }
         }
@@ -122,7 +126,7 @@ namespace Sage50c.ExtenderSample {
             var menuItem = menuGroup.ChildItems.Add("mniXCustomer1", "Meu menu 1");
             menuItem.GroupType = ExtenderGroupType.ExtenderGroupTypeExtraOptions;   //Opções de menu
 
-            menuItem = menuGroup.ChildItems.Add("mniXCustomer2", "Meu menu 2");
+            menuItem = menuGroup.ChildItems.Add("mniXFindCustomer", "Perquisar cliente");
             menuItem.GroupType = ExtenderGroupType.ExtenderGroupTypeExtraOptions;   //Opções de menu
 
             object oMenu = newMenu;
@@ -224,6 +228,35 @@ namespace Sage50c.ExtenderSample {
             //else {
             //    e.result.Success = true;
             //}
+        }
+
+        private static bool isFindind = false;
+        private bool FindCustomer( out double CustomerId ) {
+            QuickSearch quickSearch = null;
+            bool result = false;
+            CustomerId = 0;
+
+            try {
+                if (!isFindind) {
+                    isFindind = true;
+                    quickSearch = MyApp.CreateQuickSearch(QuickSearchViews.QSV_Customer, MyApp.SystemSettings.StartUpInfo.CacheQuickSearchItem);
+                    if (quickSearch.SelectValue()) {
+                        result = true;
+                        CustomerId = quickSearch.ValueSelectedDouble();
+                    }
+                    isFindind = false;
+                }
+            }
+            catch {
+                isFindind = false;
+                throw;
+            }
+            finally {
+
+            }
+            quickSearch = null;
+
+            return result;
         }
 
         public void Dispose() {

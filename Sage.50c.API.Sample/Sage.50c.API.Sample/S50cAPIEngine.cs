@@ -206,8 +206,6 @@ public static class S50cAPIEngine {
         return SystemManager.Companies;
     }
 
-
-
     /// <summary>
     /// Termina a ligação à API e liberta todos os recursos
     /// </summary>

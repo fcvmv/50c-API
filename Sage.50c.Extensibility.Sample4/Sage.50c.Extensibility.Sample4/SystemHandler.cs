@@ -7,9 +7,6 @@ using System.Text;
 
 namespace Sage50c.ExtenderSample {
     internal class SystemHandler : IDisposable {
-
-        
-        
         // System events handler
         private ExtenderSystemEvents myEvents = null;
         //

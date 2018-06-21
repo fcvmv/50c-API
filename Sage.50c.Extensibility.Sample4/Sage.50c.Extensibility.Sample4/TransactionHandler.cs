@@ -16,6 +16,8 @@ namespace Sage50c.ExtenderSample {
         private PropertyChangeNotifier propChangeNotifier = null;
         private ItemTransaction _transaction = null;
 
+        public BSOItemTransaction BSOItemTransaction { get { return bsoItemTrans; } }
+
 
         /// <summary>
         /// Eventos disparados pelo Retail:
@@ -70,7 +72,7 @@ namespace Sage50c.ExtenderSample {
         }
 
         private void HeaderEvents_OnLoad(object Sender, ExtenderEventArgs e) {
-            var trans = (ItemTransaction)e.get_data();
+            _transaction = (ItemTransaction)e.get_data();
 
             ///... Code here
 
@@ -79,6 +81,9 @@ namespace Sage50c.ExtenderSample {
 
         private void HeaderEvents_OnNew(object Sender, ExtenderEventArgs e) {
             _transaction = (ItemTransaction)e.get_data();
+
+            //var f = new FormItem();
+            //f.ShowDialog();
         }
 
         private void HeaderEvents_OnDelete(object Sender, ExtenderEventArgs e) {
