@@ -3513,5 +3513,88 @@ namespace Sage50c.API.Sample {
             }
             return result;
         }
+
+        
+        #region Tax Tab
+        private int CreateNewTax() {
+            //
+            var taxTableList = new TaxTableList();
+            //
+            // Criar nova taxa
+            var taxGroupId = "IVA";                 // Como exemplo, esta taxa será definida como IVA
+            var sequenceId = S50cAPIEngine.DSOCache.TaxesProvider.GetNewTaxSequenceID(taxGroupId);
+            var countryId = S50cAPIEngine.SystemSettings.SystemInfo.DefaultCountryID;
+            var taxRegionId = S50cAPIEngine.SystemSettings.SystemInfo.TaxRegionID;
+
+            var taxTableItem1 = new TaxTable();
+            taxTableItem1.TaxGroupID = taxGroupId; 
+            taxTableItem1.TaxSequenceID = sequenceId++;                  // Se é novo, garantir que é unico
+            taxTableItem1.TaxRate = 0;                                   // Isenta
+            //taxTableItem1.TaxExpirationDate = DateTime.Now.AddYears(1);  // Expira no proximo ano; Não preencher se não expirar.
+            taxTableItem1.TaxExemptionReasonCode = "M05";                // Preencher o motivo de isenção conforme os motivos da AT; deixar vazio de não aplicável
+            taxTableItem1.TaxExemptionReason = S50cAPIEngine.DSOCache.TaxesProvider.GetTaxExemptionReasonDescription(taxTableItem1.TaxExemptionReasonCode);
+            taxTableItem1.TaxCode = "ISE";                               // RED=Reduzida; INT=Intermédia; NOR=Normal; ISE=Isento; NS=Não Sujeito; OUT=Outros
+            taxTableItem1.CountryID = countryId;
+            taxTableItem1.TaxRegionID = taxRegionId;
+            //
+            taxTableList.Add(taxTableItem1);
+            //
+            // Criar nova taxa a 25%
+            var taxTableItem2 = new TaxTable();
+            taxTableItem2.TaxGroupID = taxGroupId;
+            taxTableItem2.TaxSequenceID = sequenceId++;                  // Se é novo, garantir que é unico
+            taxTableItem2.TaxRate = 0;                                  // 0%
+            //taxTableItem2.TaxExpirationDate = DateTime.Now.AddYears(1);// Não expira
+            taxTableItem2.TaxExemptionReasonCode = "M99";              // Não aplicável
+            taxTableItem2.TaxExemptionReason = S50cAPIEngine.DSOCache.TaxesProvider.GetTaxExemptionReasonDescription(taxTableItem2.TaxExemptionReasonCode);
+            taxTableItem2.TaxCode = "NS";                               // RED=Reduzida; INT=Intermédia; NOR=Normal; OUT=Outros
+            taxTableItem2.CountryID = countryId;
+            taxTableItem2.TaxRegionID = taxRegionId;
+            //
+            taxTableList.Add(taxTableItem2);
+            //
+            // Gravar
+            S50cAPIEngine.DSOCache.TaxesProvider.SaveTaxTableList(taxTableList, countryId, taxRegionId);
+            //
+            // Criar o agrupamento
+            var taxableGroup = new TaxableGroup();
+            taxableGroup.TaxableGroupID = (short)S50cAPIEngine.DSOCache.TaxesProvider.GetNewTaxableGroupID();
+            taxableGroup.Description = string.Format("{0} Regime TaxFree", taxGroupId);
+            //
+            // Adicionar primeiro imposto criado
+            var txGroupRule = new TaxableGroupRules();
+            txGroupRule.TaxableGroupID = taxableGroup.TaxableGroupID;
+            txGroupRule.TaxGroupID = taxTableItem1.TaxGroupID;
+            txGroupRule.TaxSequenceID = taxTableItem1.TaxSequenceID;
+            taxableGroup.TaxableGroupRulesList.Add(txGroupRule);
+            //
+            // Adicionar segundo imposto criado
+            txGroupRule = new TaxableGroupRules();
+            txGroupRule.TaxableGroupID = taxableGroup.TaxableGroupID;
+            txGroupRule.TaxGroupID = taxTableItem2.TaxGroupID;
+            txGroupRule.TaxSequenceID = taxTableItem2.TaxSequenceID;
+            taxableGroup.TaxableGroupRulesList.Add(txGroupRule);
+            //
+            // Gravar
+            S50cAPIEngine.DSOCache.TaxesProvider.SaveTaxableGroup(taxableGroup, taxableGroup.TaxableGroupID, true);
+
+            return taxableGroup.TaxableGroupID;
+
+        }
+
+        private void btnTaxCreate_Click(object sender, EventArgs e) {
+            try {
+                if (DialogResult.Yes == MessageBox.Show("Criar novos impostos e agrupamento (ver código)?", Application.ProductName, MessageBoxButtons.YesNo, MessageBoxIcon.Question)) {
+                    var taxableGroupId = CreateNewTax();
+                    MessageBox.Show(string.Format("Criado o agrupamento: {0}", taxableGroupId), 
+                                    Application.ProductName, 
+                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch(Exception ex) {
+                MessageBox.Show(ex.Message, Application.ProductName, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            }
+        }
+        #endregion
     }
 }
