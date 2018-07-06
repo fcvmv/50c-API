@@ -167,9 +167,8 @@ namespace Sage50c.ExtenderSample {
             //mnuItem1.Picture = ImageConverter.GetIPictureDispFromImage(  )
 
             //criar item2
-            mnuItem1 = mnuGroup.ChildItems.Add("mniXTrans2", "Custom Item 2");
+            mnuItem1 = mnuGroup.ChildItems.Add("mniXQuickSearch", "Procura de documento");
             mnuItem1.GroupType = ExtenderGroupType.ExtenderGroupTypeExtraOptions;
-
             object returnMenu = newMenus;
             e.result.set_data(returnMenu);
 
@@ -209,6 +208,17 @@ namespace Sage50c.ExtenderSample {
                         bsoItemTrans.AddDetail(detail);
                     }
                     break;
+
+                case "mniXQuickSearch":
+                    var transId = TransactionFind();
+                    if( transId != null) {
+                        MessageBox.Show(string.Format("Transação escolhida: {0}", transId.ToString()), Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else {
+                        MessageBox.Show("Escolha cancelada", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    break;
+
                 case "miXFunctionA":
                     MessageBox.Show("Your function here...");
                     break;
@@ -511,6 +521,57 @@ namespace Sage50c.ExtenderSample {
 
         }
 
+
+        private static bool _isFinding = false;
+        private TransactionID TransactionFind() {
+            TransactionID result = null;
+
+            try {
+                var paramValues = new S50cUtil18.clsCollection();
+                QuickSearch quickSearch = null;
+
+                if (!_isFinding) {
+                    _isFinding = true;
+                    paramValues = new S50cUtil18.clsCollection();
+                    paramValues.add(bsoItemTrans.Transaction.TransSerial, "@TransSerial");
+                    paramValues.add(bsoItemTrans.Transaction.TransDocument, "@TransDocument");
+
+                    if (bsoItemTrans.Transaction.TransDocType == DocumentTypeEnum.dcTypeSale) {
+                        // SALE
+                        //Don't cache. Changes a lot. There's a new item with every sale /purchase
+                        quickSearch = MyApp.CreateQuickSearch(QuickSearchViews.QSV_SaleTransaction, false);
+                    }
+                    else if( bsoItemTrans.Transaction.TransDocType == DocumentTypeEnum.dcTypePurchase ) {
+                        // PURCHASE
+                        //Don't cache. Changes a lot. There's a new item with every sale /purchase
+                        quickSearch = MyApp.CreateQuickSearch(QuickSearchViews.QSV_BuyTransaction, false);
+                    }
+                    else { 
+                        throw new Exception("Not implemented");
+                    }
+                    quickSearch.Parameters = paramValues;
+
+                    if (quickSearch.SelectValue()) {
+                        result = new TransactionID();
+                        result.TransSerial = bsoItemTrans.Transaction.TransSerial;
+                        result.TransDocument = bsoItemTrans.Transaction.TransDocument;
+                        result.TransDocNumber = quickSearch.ValueSelectedDouble();
+                    }
+                    else {
+                        // Canceled. Return null
+                    }
+                }
+            }
+            catch( Exception ex) {
+                MessageBox.Show(ex.Message, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                // Log something?
+            }
+            finally {
+                _isFinding = false;
+            }
+
+            return result;
+        }
 
         public void Dispose() {
             headerEvents = null;
