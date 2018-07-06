@@ -65,7 +65,7 @@ namespace Sage50c.ExtenderSample {
 
 
         /// <summary>
-        /// Retail Federal Tax Id Validator
+        /// 50c Federal Tax Id Validator
         /// </summary>
         public static S50cBL18.FederalTaxValidator FederalTaxValidator { get { return s50cBLGlobals.FederalTaxValidator; } }
         /// <summary>
@@ -74,8 +74,22 @@ namespace Sage50c.ExtenderSample {
         public static S50cLocalize18._ILocalizer gLng { get { return s50cGlobalSettings.gLng; } }
 
         public static QuickSearch CreateQuickSearch(QuickSearchViews QuickSearchId, bool CacheIt) {
-            return _50cSysGlobalSettings.CreateQuickSearch(QuickSearchId, CacheIt);
+            return s50cGlobalSettings.CreateQuickSearch(QuickSearchId, CacheIt);
         }
+
+        /// <summary>
+        /// System Folders
+        /// </summary>
+        private static SystemFolders _systemFolders = null;
+        public static SystemFolders SystemFolder {
+            get {
+                if(_systemFolders == null) {
+                    _systemFolders = new SystemFolders();
+                }
+                return _systemFolders;
+            }
+        }
+
         #endregion
     }
 }
