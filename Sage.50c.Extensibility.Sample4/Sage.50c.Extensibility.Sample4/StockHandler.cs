@@ -23,9 +23,16 @@ namespace Sage50c.ExtenderSample
             detailsStockEvents.OnValidating += DetailsStockEvents_OnValidating;
         }
 
-        private void DetailsStockEvents_OnValidating(object Sender, ExtenderEventArgs e)
-        {
-            throw new NotImplementedException();
+        private void DetailsStockEvents_OnValidating(object Sender, ExtenderEventArgs e) {
+            ExtendedPropertyList properties = (ExtendedPropertyList)e.get_data();
+            ItemTransactionDetail itemTransactionDetail = (ItemTransactionDetail)properties.get_Value("Data");
+
+            string errorMessage = string.Empty;
+
+            // Colocar a falso para falhar a validação e impedir de continuar
+            e.result.Success = true;                            
+            // Se preenchido, a mesnsagem será sempres apresentada independentemente de se marcar a validação com true ou false
+            e.result.ResultMessage = string.Format("Artigo {0} Validado com sucesso", itemTransactionDetail.ItemID);
         }
 
         public void SetHeaderEventsHandler(ExtenderEvents e)
@@ -37,9 +44,13 @@ namespace Sage50c.ExtenderSample
             headerStockEvents.OnValidating += HeaderStockEvents_OnValidating;
         }
 
-        private void HeaderStockEvents_OnValidating(object Sender, ExtenderEventArgs e)
-        {
-            throw new NotImplementedException();
+        private void HeaderStockEvents_OnValidating(object Sender, ExtenderEventArgs e) {
+            var propList = (ExtendedPropertyList)e.get_data();
+            var forDeletion = (bool)propList.get_Value("forDeletion");
+            var transaction = (StockTransaction)propList.get_Value("Data");
+
+            e.result.Success = true;
+            e.result.ResultMessage = string.Format("Documento {0} validado com sucesso.", transaction.TransactionID.ToString());
         }
 
         void HeaderStockEvents_OnMenuItem(object Sender, ExtenderEventArgs e)
