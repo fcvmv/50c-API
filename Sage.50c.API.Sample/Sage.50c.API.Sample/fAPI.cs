@@ -902,10 +902,20 @@ namespace Sage50c.API.Sample {
                     bsoItemTransaction.Transaction.VoidMotive = "Anulado por: " + Application.ProductName;
                     //
                     result = bsoItemTransaction.DeleteItemTransaction(false);
-                    if (result) 
+                    if (result)
                         transId = bsoItemTransaction.Transaction.TransactionID;
-                    else
-                        throw new Exception(string.Format("Não foi possivel anular o documento {0} {1}/{2}", transDoc, transSerial, transDocNumber));
+                    else {
+                        // Obter a mensagem exgtendida da API
+                        var exMessage = GetTransactionExtendedMessage(bsoItemTransaction.Transaction);
+                        if (string.IsNullOrEmpty(exMessage)) {
+                            throw new Exception(string.Format("Não foi possivel anular o documento {0} {1}/{2}", transDoc, transSerial, transDocNumber));
+                        }
+                        else {
+                            throw new Exception(string.Format("Não foi possivel anular o documento {0} {1}/{2}{3}{4}", 
+                                                transDoc, transSerial, transDocNumber, 
+                                                Environment.NewLine, exMessage));
+                        }
+                    }
                 }
                 else
                     throw new Exception(string.Format("Não foi possivel carregar o documento {0} {1}/{2}.", transDoc, transSerial, transDocNumber));
@@ -3596,5 +3606,14 @@ namespace Sage50c.API.Sample {
             }
         }
         #endregion
+
+        private string GetTransactionExtendedMessage(ItemTransaction transaction) {
+            string result = null;
+
+            if (transaction.ExtendedProperties.PropertyExists("APIValidationMessage")) {
+                result = (string)transaction.ExtendedProperties.get_Value("APIValidationMessage");
+            }
+            return result;
+        }
     }
 }
