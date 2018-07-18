@@ -156,6 +156,7 @@ namespace Sage50c.ExtenderSample {
 
             bsoItemTrans = (BSOItemTransaction)propList.get_Value("TransactionManager");
             bsoItemTrans.WarningItemStock += BsoItemTrans_WarningItemStock;
+            bsoItemTrans.PartyChanged += BsoItemTrans_PartyChanged;
 
             var newMenus = new ExtenderMenuItems();
             //
@@ -172,6 +173,13 @@ namespace Sage50c.ExtenderSample {
             object returnMenu = newMenus;
             e.result.set_data(returnMenu);
 
+        }
+
+        private void BsoItemTrans_PartyChanged(double PartyID) {
+            MessageBox.Show("Este é um exemplo para demonstrar como é possivel detetar a alteração da entidade na transação" + Environment.NewLine +
+                            "Nova entidade="+ PartyID.ToString(), 
+                            MyApp.SystemSettings.Application.ShortName,
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         void HeaderEvents_OnMenuItem(object Sender, ExtenderEventArgs e) {
